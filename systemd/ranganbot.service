@@ -1,0 +1,22 @@
+[Unit]
+Description=RanganBot - Discord workshop schedule bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+WorkingDirectory=/home/pi/ranganbot
+EnvironmentFile=/home/pi/ranganbot/.env
+ExecStart=/home/pi/ranganbot/.venv/bin/python /home/pi/ranganbot/bot.py
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=/home/pi/ranganbot
+
+[Install]
+WantedBy=multi-user.target
