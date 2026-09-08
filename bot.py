@@ -124,8 +124,21 @@ class RanganBotClient(discord.Client):
         database.init_db(config.DATABASE_PATH)
         guild = discord.Object(id=config.DISCORD_ALLOWED_GUILD_ID)
         self.tree.copy_global_to(guild=guild)
-        await self.tree.sync(guild=guild)
-        log.info("Slash commands synced to the configured guild.")
+        try:
+            await self.tree.sync(guild=guild)
+        except discord.HTTPException:
+            # Do not let a sync failure (e.g. the bot has not been invited
+            # to the configured guild yet, or a transient API error) take
+            # down the whole connection -- the bot should still come
+            # online so the problem can be diagnosed and fixed.
+            log.exception(
+                "Failed to sync slash commands to the configured guild; "
+                "the bot will still connect, but commands may not appear "
+                "until this is resolved (check DISCORD_ALLOWED_GUILD_ID and "
+                "that the bot has been invited to that server)."
+            )
+        else:
+            log.info("Slash commands synced to the configured guild.")
 
     async def on_ready(self) -> None:
         log.info("RanganBot connected as %s.", self.user)
